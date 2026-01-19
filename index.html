@@ -124,23 +124,25 @@ const BOT_TOKEN="8547593478:AAHmF6l_qrEfAfM0DyWEej1a2GsT8-8O10E";
 const ADMIN_CHAT="6560485203";
 const reward=0.05;
 
-let balance=Number(localStorage.getItem("bal")||0);
-let mSeen=Number(localStorage.getItem("mSeen")||0);
-let aSeen=Number(localStorage.getItem("aSeen")||0);
-let withdrawals=JSON.parse(localStorage.getItem("withdraws")||"[]");
-let isAdmin=localStorage.getItem("isAdmin")==="true";
-let tap=0;
+/* ✅ BALANCE FIX */
+let balance = parseFloat(localStorage.getItem("bal"));
+if (isNaN(balance)) balance = 0;
+
+let mSeen = Number(localStorage.getItem("mSeen")) || 0;
+let aSeen = Number(localStorage.getItem("aSeen")) || 0;
+let withdrawals = JSON.parse(localStorage.getItem("withdraws") || "[]");
+let isAdmin = localStorage.getItem("isAdmin") === "true";
+let tap = 0;
 
 function updateUI(){
-  document.getElementById("balance").innerText =
-  document.getElementById("balance2").innerText =
-  document.getElementById("balanceFixed").innerText =
-  balance.toFixed(2)+" ৳";
+  document.getElementById("balance").innerText = balance.toFixed(2) + " ৳";
+  document.getElementById("balance2").innerText = balance.toFixed(2) + " ৳";
+  document.getElementById("balanceFixed").innerText = balance.toFixed(2);
 
   document.getElementById("mSeen").innerText = mSeen;
   document.getElementById("aSeen").innerText = aSeen;
-  document.getElementById("mLeft").innerText = 60-mSeen;
-  document.getElementById("aLeft").innerText = 30-aSeen;
+  document.getElementById("mLeft").innerText = 60 - mSeen;
+  document.getElementById("aLeft").innerText = 30 - aSeen;
 }
 updateUI();
 
@@ -154,10 +156,10 @@ function watchMonetag(){show_10390731().then(()=>{balance+=reward;mSeen++;save()
 function watchAdexora(){showAdexora().then(()=>{balance+=reward;aSeen++;save();toast();});}
 
 function save(){
-  localStorage.setItem("bal",balance);
-  localStorage.setItem("mSeen",mSeen);
-  localStorage.setItem("aSeen",aSeen);
-  localStorage.setItem("withdraws",JSON.stringify(withdrawals));
+  localStorage.setItem("bal", balance);
+  localStorage.setItem("mSeen", mSeen);
+  localStorage.setItem("aSeen", aSeen);
+  localStorage.setItem("withdraws", JSON.stringify(withdrawals));
   updateUI();updateHistory();
 }
 
