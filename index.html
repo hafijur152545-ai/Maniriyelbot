@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Maniriyel Bot</title>
 
-<!-- Monetag AD -->
+<!-- Monetag -->
 <script src='//libtl.com/sdk.js' data-zone='10390731' data-sdk='show_10390731'></script>
 
-<!-- Adexora AD -->
+<!-- Adexora -->
 <script src="https://adexora.com/cdn/ads.js?id=1551"></script>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -18,10 +18,19 @@ body{margin:0;font-family:Segoe UI,sans-serif;background:#f2f4ff;padding-bottom:
 .header{background:linear-gradient(135deg,#6d5dfc,#8f9bff);color:#fff;padding:20px;border-radius:0 0 25px 25px}
 .card{background:#fff;margin:15px;padding:20px;border-radius:20px;box-shadow:0 10px 25px rgba(0,0,0,.1)}
 .balance{font-size:36px;font-weight:700}
-.btn{width:100%;padding:14px;margin-top:10px;border:none;border-radius:14px;background:#2f3437;color:#fff;font-size:16px}
+
+/* BUTTON COLORS */
+.btn{width:100%;padding:15px;margin-top:12px;border:none;border-radius:14px;font-size:16px;color:#fff}
+.btn-monetag{background:linear-gradient(135deg,#ff9800,#ff5722)}
+.btn-adexora{background:linear-gradient(135deg,#00c853,#009688)}
+.btn-withdraw{background:#2f3437}
+.btn-ref{background:#3f51b5}
+
 input,select{width:100%;padding:12px;margin-top:10px;border-radius:10px;border:1px solid #ccc}
+
 .screen{display:none}
 .screen.active{display:block}
+
 .nav{position:fixed;bottom:10px;left:10px;right:10px;background:#2f3437;border-radius:20px;padding:12px;display:flex;justify-content:space-around;color:#bbb}
 .nav span{font-size:22px}
 .nav .active{color:#fff}
@@ -42,15 +51,15 @@ input,select{width:100%;padding:12px;margin-top:10px;border-radius:10px;border:1
     <small>Total Balance</small>
   </div>
   <div class="card">
-    <button class="btn" onclick="copyReferral()">👥 Referral Link</button>
+    <button class="btn btn-ref" onclick="copyReferral()">👥 Referral Link</button>
   </div>
 </div>
 
 <!-- EARN -->
 <div id="earn" class="screen">
   <div class="card">
-    <button class="btn" onclick="watchMonetag()">📺 Watch Ad (Monetag +0.7৳)</button>
-    <button class="btn" onclick="watchAdexora()">📺 Watch Ad (Adexora +0.7৳)</button>
+    <button class="btn btn-monetag" onclick="watchMonetag()">📺 Watch Ad (Monetag +0.7৳)</button>
+    <button class="btn btn-adexora" onclick="watchAdexora()">🎥 Watch Ad (Adexora +0.7৳)</button>
   </div>
 </div>
 
@@ -66,7 +75,7 @@ input,select{width:100%;padding:12px;margin-top:10px;border-radius:10px;border:1
     </select>
     <input id="number" placeholder="Payment Number">
     <input id="amount" type="number" placeholder="Amount">
-    <button class="btn" onclick="submitWithdraw()">Submit Withdraw</button>
+    <button class="btn btn-withdraw" onclick="submitWithdraw()">Submit Withdraw</button>
   </div>
 </div>
 
@@ -104,7 +113,7 @@ let history=JSON.parse(localStorage.getItem("history")||"[]");
 balanceEl.innerText=balance.toFixed(2)+" ৳";
 userInfo.innerText=user.first_name+" | ID:"+user.id;
 
-/* REFERRAL */
+/* REF */
 let refId=new URLSearchParams(window.location.search).get("start");
 if(refId && !localStorage.getItem("referred")){
   localStorage.setItem("referred",refId);
@@ -118,7 +127,7 @@ function showScreen(id,el){
   el.classList.add("active");
 }
 
-/* UPDATE BALANCE */
+/* BALANCE */
 function addBalance(){
   balance+=AD_REWARD;
   localStorage.setItem("balance",balance);
@@ -127,20 +136,36 @@ function addBalance(){
   if(localStorage.getItem("referred")){
     let bonus=(AD_REWARD*REF_PERCENT).toFixed(2);
     fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${ADMIN_ID}&text=`+
-    encodeURIComponent(`Referral Bonus\nReferrer ID:${localStorage.getItem("referred")}\nBonus:${bonus}৳`));
+    encodeURIComponent(`Referral Bonus\nReferrer:${localStorage.getItem("referred")}\nBonus:${bonus}৳`));
   }
 }
 
 /* MONETAG */
 function watchMonetag(){
-  if(typeof show_10390731!=="function"){alert("Monetag not ready");return;}
-  show_10390731().then(()=>addBalance());
+  if(typeof show_10390731!=="function"){
+    alert("Monetag not ready");
+    return;
+  }
+  show_10390731().then(()=>{
+    addBalance();
+    alert("✅ Ad watched successfully!");
+  });
 }
 
 /* ADEXORA */
 function watchAdexora(){
-  if(typeof showAdexora!=="function"){alert("Adexora not ready");return;}
-  showAdexora().then(()=>addBalance()).catch(()=>alert("Ad failed"));
+  if(typeof showAdexora!=="function"){
+    alert("Adexora not supported here");
+    return;
+  }
+  showAdexora()
+  .then(()=>{
+    addBalance();
+    alert("✅ Ad watched successfully!");
+  })
+  .catch(()=>{
+    alert("❌ Ad not available now, try later");
+  });
 }
 
 /* WITHDRAW */
@@ -160,12 +185,14 @@ function submitWithdraw(){
   history.push(`${m} | ${a}৳`);
   localStorage.setItem("history",JSON.stringify(history));
   renderHistory();
-  alert("Withdraw Sent");
+  alert("Withdraw request sent");
 }
 
 /* HISTORY */
 function renderHistory(){
-  historyList.innerHTML=history.length?history.map(h=>`<p>${h}</p>`).join(""):"No history";
+  historyList.innerHTML=history.length
+    ? history.map(h=>`<p>${h}</p>`).join("")
+    : "No history";
 }
 renderHistory();
 
