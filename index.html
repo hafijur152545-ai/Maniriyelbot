@@ -2,158 +2,176 @@
 <html lang="bn">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Earn Money Bot</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- Monetag -->
+<script src='//libtl.com/sdk.js' data-zone='10390731' data-sdk='show_10390731'></script>
+
+<!-- Adexora -->
+<script src="https://adexora.com/cdn/ads.js?id=1551"></script>
 
 <style>
+*{box-sizing:border-box}
 body{
   margin:0;
-  font-family:Arial;
+  font-family:Arial,sans-serif;
   background:#f2f4ff;
+  padding-bottom:90px;
 }
+
+/* HEADER */
 .header{
   background:#7c7cff;
   color:#fff;
-  padding:18px;
   text-align:center;
+  padding:18px;
+  font-size:22px;
+  font-weight:bold;
 }
-.section{display:none;padding:14px}
-.section.active{display:block}
 
+/* CONTAINER */
+.container{
+  max-width:420px;
+  margin:auto;
+}
+
+/* CARD */
 .card{
   background:#fff;
-  padding:16px;
-  margin-bottom:14px;
+  margin:15px;
+  padding:18px;
   border-radius:16px;
   box-shadow:0 6px 16px rgba(0,0,0,.1);
 }
+
+/* BALANCE */
 .balance{
   font-size:30px;
   font-weight:bold;
+  text-align:center;
 }
 
+/* BUTTON */
 .btn{
   width:100%;
-  padding:12px;
+  padding:14px;
   margin-top:10px;
   border:none;
   border-radius:12px;
-  font-size:16px;
-  font-weight:600;
+  font-size:17px;
   color:#fff;
 }
-.blue{background:#3b5bdb}
-.purple{background:#9c27b0}
-.green{background:#2f9e44}
+.btn-monetag{background:#3b5bdb}
+.btn-adexora{background:#9c27b0}
+.btn-withdraw{background:#2f9e44}
 
-.info{
-  margin-top:6px;
-  font-size:14px;
-}
+/* TEXT */
+.info{font-size:14px;margin-top:6px;text-align:center}
+.timer{text-align:center;color:red;font-weight:bold}
 
-.timer{
-  color:red;
-  font-weight:bold;
-  margin-top:4px;
-}
-
-.notice{
-  font-size:14px;
-  line-height:1.6;
-}
-
+/* NAV */
 .nav{
   position:fixed;
-  bottom:0;
-  width:100%;
+  bottom:0;left:0;right:0;
   background:#222;
   display:flex;
 }
 .nav button{
   flex:1;
   padding:14px;
-  border:none;
   background:none;
+  border:none;
   color:#fff;
   font-size:15px;
 }
+
+/* SECTION */
+.section{display:none}
+.section.active{display:block}
+
+input,select{
+  width:100%;
+  padding:12px;
+  margin-top:8px;
+  border-radius:10px;
+  border:1px solid #ccc;
+}
 </style>
-
-<!-- Monetag -->
-<script src='//libtl.com/sdk.js' data-zone='10390731' data-sdk='show_10390731'></script>
-
 </head>
+
 <body>
 
-<div class="header">
-  <h2>💰 Earn Money Bot</h2>
-</div>
+<div class="header">💰 Earn Money Bot</div>
+
+<div class="container">
 
 <!-- HOME -->
 <div id="home" class="section active">
   <div class="card">
     <div class="balance" id="balance">0.00 ৳</div>
-    <p>Total Balance</p>
+    <p style="text-align:center">Total Balance</p>
   </div>
 
   <div class="card">
-    <h3>📌 কাজ করার নিয়ম</h3>
-    <div class="notice">
-      ✔️ সবাই নিয়ম মেনে কাজ করবেন<br>
-      ✔️ ১০টা এড দেখার পরে ১টা এডে ক্লিক করবেন<br>
-      ✔️ নিয়ম না মানলে ব্যালেন্স কাটা যেতে পারে<br>
-      ✔️ নিয়ম মেনে কাজ করলে ১০০% পেমেন্ট
-    </div>
+    <b>📌 কাজ করার নিয়ম</b><br><br>
+    ✔️ Monetag ও Adexora দেখতে হবে<br>
+    ✔️ টাইম শেষ না করলে টাকা পাবেন না<br>
+    ✔️ Back দিলে Reward হবে না<br>
+    ✔️ নিয়ম মেনে কাজ করলে ১০০% পেমেন্ট
   </div>
 </div>
 
 <!-- EARN -->
 <div id="earn" class="section">
-
-  <!-- BALANCE ALWAYS ON TOP -->
   <div class="card">
-    <div class="balance" id="balanceEarn">0.00 ৳</div>
-    <p>Total Balance</p>
-  </div>
+    <div class="balance" id="balance2">0.00 ৳</div>
+    <p style="text-align:center">Current Balance</p>
 
-  <div class="card">
-    <button class="btn blue" onclick="watchMonetag()">📺 Watch Ad (Monetag)</button>
+    <button class="btn btn-monetag" onclick="watchMonetag()">
+      📺 Watch Ad (Monetag +0.07৳)
+    </button>
+    <div class="info">
+      দেখা হয়েছে: <span id="mSeen">0</span> |
+      বাকি: <span id="mLeft">60</span>
+    </div>
     <div class="timer" id="mtimer"></div>
-    <div class="info">
-      দেখা হয়েছে: <b><span id="mSeen">0</span></b> |
-      বাকি আছে: <b><span id="mLeft">60</span></b>
-    </div>
 
-    <button class="btn purple" onclick="watchAdexora()">📺 Watch Ad (Adexora)</button>
-    <div class="timer" id="atimer"></div>
+    <button class="btn btn-adexora" onclick="watchAdexora()">
+      📺 Watch Ad (Adexora +0.07৳)
+    </button>
     <div class="info">
-      দেখা হয়েছে: <b><span id="aSeen">0</span></b> |
-      বাকি আছে: <b><span id="aLeft">30</span></b>
+      দেখা হয়েছে: <span id="aSeen">0</span> |
+      বাকি: <span id="aLeft">30</span>
     </div>
+    <div class="timer" id="atimer"></div>
   </div>
 </div>
 
 <!-- WITHDRAW -->
 <div id="withdraw" class="section">
   <div class="card">
+    <b>💸 Withdraw</b>
     <select id="method">
       <option value="">Method নির্বাচন করুন</option>
       <option>bKash</option>
       <option>Nagad</option>
-    </select><br><br>
-    <input id="number" placeholder="Number"><br><br>
-    <input id="amount" type="number" placeholder="Amount"><br><br>
-    <button class="btn green" onclick="withdraw()">Submit Withdraw</button>
-    <p id="wmsg"></p>
+    </select>
+    <input id="number" placeholder="Payment Number">
+    <input id="amount" type="number" placeholder="Withdraw Amount">
+    <button class="btn btn-withdraw">Submit Withdraw</button>
   </div>
 </div>
 
 <!-- HISTORY -->
 <div id="history" class="section">
   <div class="card">
-    <p>📊 Monetag Ads Seen: <span id="mh">0</span></p>
-    <p>📊 Adexora Ads Seen: <span id="ah">0</span></p>
+    📊 Monetag Seen: <span id="mSeenH">0</span><br>
+    📊 Adexora Seen: <span id="aSeenH">0</span><br>
+    💰 Balance: <span id="balH">0.00 ৳</span>
   </div>
+</div>
+
 </div>
 
 <!-- NAV -->
@@ -165,57 +183,46 @@ body{
 </div>
 
 <script>
-let bal = Number(localStorage.getItem("bal")||0);
-let m = Number(localStorage.getItem("m")||0);
-let a = Number(localStorage.getItem("a")||0);
-
-const mLimit=60, aLimit=30;
+let balance=Number(localStorage.getItem("balance")||0);
+let mSeen=Number(localStorage.getItem("mSeen")||0);
+let aSeen=Number(localStorage.getItem("aSeen")||0);
 
 function update(){
- balance.innerText = bal.toFixed(2)+" ৳";
- balanceEarn.innerText = bal.toFixed(2)+" ৳";
- mSeen.innerText=m; aSeen.innerText=a;
- mLeft.innerText=mLimit-m; aLeft.innerText=aLimit-a;
- mh.innerText=m; ah.innerText=a;
+  balance2.innerText=balance.toFixed(2)+" ৳";
+  balance.innerText=balance.toFixed(2)+" ৳";
+  mSeenH.innerText=mSeen;
+  aSeenH.innerText=aSeen;
+  balH.innerText=balance.toFixed(2)+" ৳";
+  mLeft.innerText=60-mSeen;
+  aLeft.innerText=30-aSeen;
 }
 update();
 
 function show(id){
- document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
- document.getElementById(id).classList.add("active");
-}
-
-function timer(sec, el, cb){
- let t=sec; el.innerText=t+"s";
- let i=setInterval(()=>{
-  t--; el.innerText=t+"s";
-  if(t<=0){clearInterval(i);el.innerText="Completed";cb();}
- },1000);
+  document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
 }
 
 function watchMonetag(){
- if(m>=mLimit) return alert("আজকের Monetag শেষ");
- show_10390731();
- timer(17, mtimer, ()=>{bal+=0.7; m++; save();});
+  if(typeof show_10390731!=="function")return alert("Ad loading");
+  show_10390731();
+  setTimeout(()=>{
+    balance+=0.07; mSeen++;
+    localStorage.setItem("balance",balance);
+    localStorage.setItem("mSeen",mSeen);
+    update();
+  },17000);
 }
 
 function watchAdexora(){
- if(a>=aLimit) return alert("আজকের Adexora শেষ");
- timer(20, atimer, ()=>{bal+=0.7; a++; save();});
-}
-
-function withdraw(){
- let amt=Number(amount.value);
- if(amt>bal) return wmsg.innerText="Balance কম";
- bal-=amt; save();
- wmsg.innerText="Withdraw Request Sent";
-}
-
-function save(){
- localStorage.setItem("bal",bal);
- localStorage.setItem("m",m);
- localStorage.setItem("a",a);
- update();
+  if(typeof showAdexora!=="function")return alert("Ad loading");
+  showAdexora();
+  setTimeout(()=>{
+    balance+=0.07; aSeen++;
+    localStorage.setItem("balance",balance);
+    localStorage.setItem("aSeen",aSeen);
+    update();
+  },20000);
 }
 </script>
 
