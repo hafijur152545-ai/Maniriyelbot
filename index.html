@@ -3,24 +3,65 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Maniriyel Bot</title>
+<title>Telegram Mini App</title>
 
-<!-- AD -->
+<!-- ===== Monetag ===== -->
 <script src='//libtl.com/sdk.js' data-zone='10390731' data-sdk='show_10390731'></script>
+
+<!-- ===== Adexora ===== -->
+<script src="https://adexora.com/cdn/ads.js?id=1551"></script>
+
+<!-- ===== Telegram SDK ===== -->
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <style>
-body{margin:0;font-family:Segoe UI,sans-serif;background:#f2f4ff;padding-bottom:120px}
-.header{background:linear-gradient(135deg,#6d5dfc,#8f9bff);color:#fff;padding:20px;border-radius:0 0 25px 25px}
-.card{background:#fff;margin:15px;padding:20px;border-radius:20px;box-shadow:0 10px 25px rgba(0,0,0,.1)}
-.balance{font-size:36px;font-weight:700}
-.btn{width:100%;padding:14px;margin-top:10px;border:none;border-radius:14px;background:#2f3437;color:#fff;font-size:16px}
-input,select{width:100%;padding:12px;margin-top:10px;border-radius:10px;border:1px solid #ccc}
-.screen{display:none}
-.screen.active{display:block}
-.nav{position:fixed;bottom:10px;left:10px;right:10px;background:#2f3437;border-radius:20px;padding:12px;display:flex;justify-content:space-around;color:#bbb}
+body{
+  margin:0;
+  font-family:Segoe UI,sans-serif;
+  background:#f2f4ff;
+  padding-bottom:120px;
+}
+.header{
+  background:linear-gradient(135deg,#6d5dfc,#8f9bff);
+  color:#fff;
+  padding:20px;
+  border-radius:0 0 25px 25px;
+}
+.card{
+  background:#fff;
+  margin:15px;
+  padding:20px;
+  border-radius:20px;
+  box-shadow:0 10px 25px rgba(0,0,0,.1);
+}
+.balance{
+  font-size:36px;
+  font-weight:700;
+}
+.btn{
+  width:100%;
+  padding:14px;
+  margin-top:10px;
+  border:none;
+  border-radius:14px;
+  background:#2f3437;
+  color:#fff;
+  font-size:16px;
+}
+.nav{
+  position:fixed;
+  bottom:10px;
+  left:10px;
+  right:10px;
+  background:#2f3437;
+  border-radius:20px;
+  padding:12px;
+  display:flex;
+  justify-content:space-around;
+  color:#bbb;
+}
 .nav span{font-size:22px}
-.nav .active{color:#fff}
+.active{color:#fff}
 </style>
 </head>
 
@@ -31,136 +72,109 @@ input,select{width:100%;padding:12px;margin-top:10px;border-radius:10px;border:1
   <small id="userInfo">User</small>
 </div>
 
-<!-- HOME -->
-<div id="home" class="screen active">
-  <div class="card">
-    <div class="balance" id="balance">0.00 ৳</div>
-    <small>Total Balance</small>
-  </div>
-  <div class="card">
-    <button class="btn" onclick="copyReferral()">👥 Referral Link</button>
-  </div>
+<div class="card">
+  <div class="balance" id="balance">0.00 ৳</div>
+  <small>Total Balance</small>
 </div>
 
-<!-- EARN -->
-<div id="earn" class="screen">
-  <div class="card">
-    <button class="btn" onclick="watchAd()">📺 Watch Ad (+2৳)</button>
-  </div>
+<div class="card">
+  <button class="btn" onclick="watchMonetag()">📺 Watch Ad (Monetag +0.7৳)</button>
+  <button class="btn" onclick="watchAdexora()">🎥 Watch Ad (Adexora +0.7৳)</button>
+  <button class="btn" onclick="withdraw()">💸 Withdraw</button>
+  <button class="btn" onclick="referral()">👥 Referral</button>
 </div>
 
-<!-- WITHDRAW -->
-<div id="withdraw" class="screen">
-  <div class="card">
-    <h3>💸 Withdraw</h3>
-    <select id="method">
-      <option value="">Select Method</option>
-      <option>Bkash</option>
-      <option>Nagad</option>
-      <option>Rocket</option>
-    </select>
-    <input id="number" placeholder="Payment Number">
-    <input id="amount" type="number" placeholder="Amount">
-    <button class="btn" onclick="submitWithdraw()">Submit Withdraw</button>
-  </div>
-</div>
-
-<!-- HISTORY -->
-<div id="history" class="screen">
-  <div class="card">
-    <h3>🧾 History</h3>
-    <div id="historyList">No history</div>
-  </div>
-</div>
-
-<!-- NAV -->
 <div class="nav">
-  <span onclick="showScreen('home',this)" class="active">🏠</span>
-  <span onclick="showScreen('earn',this)">🎬</span>
-  <span onclick="showScreen('withdraw',this)">💸</span>
-  <span onclick="showScreen('history',this)">🧾</span>
+  <span class="active">🏠</span>
+  <span>🎬</span>
+  <span>💸</span>
+  <span>🧾</span>
 </div>
 
 <script>
-/* CONFIG */
-const BOT_TOKEN="8547593478:AAHfAaZNdh6-gii36zff0DqIAxuuuHQUwd0";
-const ADMIN_ID="6560485203";
-const AD_REWARD=2;
-const REF_PERCENT=0.10;
-const MIN_WITHDRAW=20;
+/* ===== CHANGE ONLY THESE ===== */
+const BOT_TOKEN = "YOUR_BOT_TOKEN";
+const ADMIN_ID = "YOUR_ADMIN_ID";
+/* ============================ */
 
-const tg=window.Telegram.WebApp;
+const MONETAG_REWARD = 0.7;
+const ADEXORA_REWARD = 0.7;
+
+const tg = window.Telegram.WebApp;
 tg.expand();
 
-let user=tg.initDataUnsafe.user;
-let balance=Number(localStorage.getItem("balance")||0);
-let history=JSON.parse(localStorage.getItem("history")||"[]");
+let balance = Number(localStorage.getItem("balance") || 0);
+updateBalance();
 
-document.getElementById("balance").innerText=balance.toFixed(2)+" ৳";
-document.getElementById("userInfo").innerText=user.first_name+" | ID:"+user.id;
-
-/* REFERRAL */
-let refId=new URLSearchParams(window.location.search).get("start");
-if(refId && !localStorage.getItem("referred")){
-  localStorage.setItem("referred",refId);
+if (tg.initDataUnsafe.user){
+  document.getElementById("userInfo").innerText =
+    tg.initDataUnsafe.user.first_name + " | ID: " + tg.initDataUnsafe.user.id;
 }
 
-/* NAV */
-function showScreen(id,el){
-  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-  document.querySelectorAll(".nav span").forEach(n=>n.classList.remove("active"));
-  el.classList.add("active");
+function updateBalance(){
+  document.getElementById("balance").innerText = balance.toFixed(2) + " ৳";
 }
 
-/* AD */
-function watchAd(){
-  if(typeof show_10390731!=="function"){alert("Ad not ready");return;}
-  show_10390731().then(()=>{
-    balance+=AD_REWARD;
-    localStorage.setItem("balance",balance);
-    document.getElementById("balance").innerText=balance.toFixed(2)+" ৳";
+/* ===== Monetag ===== */
+function watchMonetag(){
+  if (typeof window.show_10390731 !== "function"){
+    alert("Monetag ad not ready");
+    return;
+  }
 
-    if(localStorage.getItem("referred")){
-      let bonus=AD_REWARD*REF_PERCENT;
-      fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${ADMIN_ID}&text=`+
-      encodeURIComponent(`Referral Bonus\nReferrer ID:${localStorage.getItem("referred")}\nBonus:${bonus}৳`));
-    }
+  window.show_10390731().then(()=>{
+    balance += MONETAG_REWARD;
+    localStorage.setItem("balance", balance);
+    updateBalance();
   });
 }
 
-/* WITHDRAW */
-function submitWithdraw(){
-  let m=method.value,n=number.value,a=Number(amount.value);
-  if(!m||!n||!a)return alert("Fill all");
-  if(a<MIN_WITHDRAW)return alert("Minimum 20৳");
-  if(a>balance)return alert("Low balance");
+/* ===== Adexora ===== */
+function watchAdexora(){
+  if (typeof window.showAdexora !== "function"){
+    alert("Adexora ad not ready");
+    return;
+  }
 
-  fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${ADMIN_ID}&text=`+
-  encodeURIComponent(`Withdraw\nUser:${user.id}\n${m}\n${n}\nAmount:${a}৳`));
-
-  balance-=a;
-  localStorage.setItem("balance",balance);
-  document.getElementById("balance").innerText=balance.toFixed(2)+" ৳";
-
-  history.push(`${m} | ${a}৳`);
-  localStorage.setItem("history",JSON.stringify(history));
-  renderHistory();
-  alert("Withdraw Sent");
+  window.showAdexora()
+    .then(()=>{
+      balance += ADEXORA_REWARD;
+      localStorage.setItem("balance", balance);
+      updateBalance();
+    })
+    .catch(()=>{
+      alert("Adexora ad failed");
+    });
 }
 
-/* HISTORY */
-function renderHistory(){
-  historyList.innerHTML=history.length?history.map(h=>`<p>${h}</p>`).join(""):"No history";
-}
-renderHistory();
+/* ===== Withdraw ===== */
+function withdraw(){
+  if (balance < 20){
+    alert("Minimum withdraw 20৳");
+    return;
+  }
 
-/* REF LINK */
-function copyReferral(){
-  let link=`https://t.me/maniriyel_bot?start=${user.id}`;
+  const msg =
+    `Withdraw Request\nUser ID: ${tg.initDataUnsafe.user.id}\nAmount: ${balance}৳`;
+
+  fetch(
+    `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${ADMIN_ID}&text=` +
+    encodeURIComponent(msg)
+  );
+
+  balance = 0;
+  localStorage.setItem("balance", 0);
+  updateBalance();
+  alert("Withdraw request sent");
+}
+
+/* ===== Referral ===== */
+function referral(){
+  const link = `https://t.me/maniriyel_bot?start=${tg.initDataUnsafe.user.id}`;
   navigator.clipboard.writeText(link);
   alert("Referral link copied");
 }
 </script>
+
 </body>
 </html>
