@@ -14,48 +14,47 @@ body{
 .header{
   background:#7c7cff;
   color:#fff;
-  padding:22px;
+  padding:20px;
   text-align:center;
 }
-.section{ display:none; padding:15px; }
-.section.active{ display:block; }
+.section{display:none;padding:15px}
+.section.active{display:block}
 
 .card{
   background:#fff;
-  padding:24px;
-  margin-bottom:16px;
+  padding:20px;
+  margin-bottom:15px;
   border-radius:18px;
   box-shadow:0 6px 18px rgba(0,0,0,.12);
 }
 .balance{
-  font-size:36px;
+  font-size:32px;
   font-weight:bold;
 }
 
 .btn{
   width:100%;
-  padding:24px;
-  margin-top:14px;
+  padding:16px;
+  margin-top:12px;
   border:none;
-  border-radius:16px;
-  font-size:21px;
+  border-radius:14px;
+  font-size:18px;
   font-weight:600;
   color:#fff;
 }
-.blue{background:#3b5bdb;}
-.purple{background:#9c27b0;}
-.green{background:#2f9e44;}
+.blue{background:#3b5bdb}
+.purple{background:#9c27b0}
+.green{background:#2f9e44}
 
 .info{
-  margin-top:10px;
-  font-size:15px;
-  color:#333;
+  margin-top:8px;
+  font-size:14px;
 }
 
 .timer{
   color:red;
-  margin-top:6px;
   font-weight:bold;
+  margin-top:5px;
 }
 
 .notice{
@@ -72,11 +71,11 @@ body{
 }
 .nav button{
   flex:1;
-  padding:18px;
+  padding:16px;
   border:none;
   background:none;
   color:#fff;
-  font-size:17px;
+  font-size:16px;
 }
 </style>
 
@@ -101,9 +100,9 @@ body{
     <h3>📌 কাজ করার নিয়ম</h3>
     <div class="notice">
       ✔️ সবাই নিয়ম মেনে কাজ করবেন<br>
-      ✔️ ১০টা এড দেখার পরে অবশ্যই ১টা এডে ক্লিক করবেন<br>
+      ✔️ ১০টা এড দেখার পরে ১টা এডে ক্লিক করবেন<br>
       ✔️ নিয়ম না মানলে ব্যালেন্স কাটা যেতে পারে<br>
-      ✔️ নিয়ম মেনে কাজ করলে ১০০% পেমেন্ট দেওয়া হবে
+      ✔️ নিয়ম মেনে কাজ করলে ১০০% পেমেন্ট
     </div>
   </div>
 </div>
@@ -111,7 +110,11 @@ body{
 <!-- EARN -->
 <div id="earn" class="section">
   <div class="card">
+    <div class="balance" id="balanceEarn">0.00 ৳</div>
+    <p>Total Balance</p>
+  </div>
 
+  <div class="card">
     <button class="btn blue" onclick="watchMonetag()">📺 Watch Ad (Monetag)</button>
     <div class="timer" id="mtimer"></div>
     <div class="info">
@@ -125,7 +128,6 @@ body{
       দেখা হয়েছে: <b><span id="aSeen">0</span></b> |
       বাকি আছে: <b><span id="aLeft">30</span></b>
     </div>
-
   </div>
 </div>
 
@@ -165,17 +167,14 @@ let bal = Number(localStorage.getItem("bal")||0);
 let m = Number(localStorage.getItem("m")||0);
 let a = Number(localStorage.getItem("a")||0);
 
-const mLimit = 60;
-const aLimit = 30;
+const mLimit=60, aLimit=30;
 
 function update(){
- document.getElementById("balance").innerText = bal.toFixed(2)+" ৳";
- document.getElementById("mSeen").innerText = m;
- document.getElementById("aSeen").innerText = a;
- document.getElementById("mLeft").innerText = mLimit - m;
- document.getElementById("aLeft").innerText = aLimit - a;
- document.getElementById("mh").innerText = m;
- document.getElementById("ah").innerText = a;
+ balance.innerText = bal.toFixed(2)+" ৳";
+ balanceEarn.innerText = bal.toFixed(2)+" ৳";
+ mSeen.innerText=m; aSeen.innerText=a;
+ mLeft.innerText=mLimit-m; aLeft.innerText=aLimit-a;
+ mh.innerText=m; ah.innerText=a;
 }
 update();
 
@@ -185,40 +184,28 @@ function show(id){
 }
 
 function timer(sec, el, cb){
- let t=sec;
- el.innerText = t+"s";
+ let t=sec; el.innerText=t+"s";
  let i=setInterval(()=>{
   t--; el.innerText=t+"s";
-  if(t<=0){
-    clearInterval(i);
-    el.innerText="Completed";
-    cb();
-  }
+  if(t<=0){clearInterval(i);el.innerText="Completed";cb();}
  },1000);
 }
 
 function watchMonetag(){
  if(m>=mLimit) return alert("আজকের Monetag শেষ");
- window.show_10390731();
- timer(17, mtimer, ()=>{
-  bal+=0.7; m++;
-  save();
- });
+ show_10390731();
+ timer(17, mtimer, ()=>{bal+=0.7; m++; save();});
 }
 
 function watchAdexora(){
  if(a>=aLimit) return alert("আজকের Adexora শেষ");
- timer(20, atimer, ()=>{
-  bal+=0.7; a++;
-  save();
- });
+ timer(20, atimer, ()=>{bal+=0.7; a++; save();});
 }
 
 function withdraw(){
- let amt = Number(amount.value);
+ let amt=Number(amount.value);
  if(amt>bal) return wmsg.innerText="Balance কম";
- bal-=amt;
- save();
+ bal-=amt; save();
  wmsg.innerText="Withdraw Request Sent";
 }
 
