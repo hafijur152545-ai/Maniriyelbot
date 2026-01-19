@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Telegram Mini App</title>
+
+<!-- ========= AD NETWORK ========= -->
+
+<script src='//libtl.com/sdk.js' data-zone='10390731' data-sdk='show_10390731'></script>
+
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+<!-- ============================== -->
+
+<style>
+body{margin:0;font-family:Segoe UI,sans-serif;background:#f2f4ff}
+.header{background:linear-gradient(135deg,#6d5dfc,#8f9bff);color:#fff;padding:20px;border-radius:0 0 25px 25px}
+.card{background:#fff;margin:15px;padding:20px;border-radius:20px;box-shadow:0 10px 25px rgba(0,0,0,.1)}
+.balance{font-size:36px;font-weight:700}
+.btn{width:100%;padding:14px;margin-top:10px;border:none;border-radius:14px;background:#2f3437;color:#fff;font-size:16px}
+.nav{position:fixed;bottom:10px;left:10px;right:10px;background:#2f3437;border-radius:20px;padding:12px;display:flex;justify-content:space-around;color:#bbb}
+.nav span{font-size:22px}
+.active{color:#fff}
+</style>
+
+</head>
+
+<body>
+
+<div class="header">
+  <h2>💰 Earn Money Bot</h2>
+  <small id="userInfo">User</small>
+</div>
+
+<div class="card">
+  <div class="balance" id="balance">0.00 ৳</div>
+  <small>Total Balance</small>
+</div>
+
+<div class="card">
+  <button class="btn" onclick="watchAd()">📺 Watch Ad (+2৳)</button>
+  <button class="btn" onclick="withdraw()">💸 Withdraw</button>
+  <button class="btn" onclick="referral()">👥 Referral</button>
+</div>
+
+<div class="nav">
+  <span class="active">🏠</span>
+  <span>💰</span>
+  <span>👤</span>
+</div>
+
+<script>
+/* ====== CHANGE THESE 2 LINES ONLY ====== */
+const BOT_TOKEN = "8547593478:AAHfAaZNdh6-gii36zff0DqIAxuuuHQUwd0";
+const ADMIN_ID = "6560485203";
+/* ====================================== */
+
+const AD_REWARD = 2;
+
+const tg = window.Telegram.WebApp;
+tg.expand();
+
+let balance = Number(localStorage.getItem("balance") || 0);
+document.getElementById("balance").innerText = balance.toFixed(2)+" ৳";
+
+if (tg.initDataUnsafe.user){
+  document.getElementById("userInfo").innerText =
+    tg.initDataUnsafe.user.first_name + " | ID: " + tg.initDataUnsafe.user.id;
+}
+
+function watchAd(){
+  if (typeof window.show_10390731 !== "function"){
+    alert("Ad not ready");
+    return;
+  }
+  window.show_10390731().then(()=>{
+    balance += AD_REWARD;
+    localStorage.setItem("balance", balance);
+    document.getElementById("balance").innerText = balance.toFixed(2)+" ৳";
+  });
+}
+
+function withdraw(){
+  if (balance < 20){
+    alert("Minimum withdraw 20৳");
+    return;
+  }
+  const msg = `Withdraw Request\nUser ID: ${tg.initDataUnsafe.user.id}\nAmount: ${balance}৳`;
+  fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${ADMIN_ID}&text=`+encodeURIComponent(msg));
+  balance = 0;
+  localStorage.setItem("balance", 0);
+  document.getElementById("balance").innerText="0.00 ৳";
+  alert("Withdraw Request Sent");
+}
+
+function referral(){
+  const link = `https://t.me/maniriyel_bot?start=${tg.initDataUnsafe.user.id}`;
+  navigator.clipboard.writeText(link);
+  alert("Referral link copied");
+}
+</script>
+
+</body>
+</html>
