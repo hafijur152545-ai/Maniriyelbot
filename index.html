@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="bn">
 <head>
 <meta charset="UTF-8">
@@ -7,109 +6,39 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <!-- Monetag -->
-
 <script src="//libtl.com/sdk.js" data-zone="10390731" data-sdk="show_10390731"></script>
 
 <!-- Adexora -->
-
 <script src="https://adexora.com/cdn/ads.js?id=1551"></script>
 
 <style>
-body{
-  margin:0;
-  font-family: Arial, sans-serif;
-  background:#f6f7fb;
-}
-.header{
-  background:#ff4fa3;
-  color:#fff;
-  padding:18px;
-  text-align:center;
-  font-size:20px;
-}
-.container{
-  padding:15px;
-}
-.card{
-  background:#fff;
-  border-radius:12px;
-  padding:15px;
-  margin-bottom:15px;
-  box-shadow:0 2px 6px rgba(0,0,0,.08);
-}
-.balance{
-  font-size:28px;
-  font-weight:bold;
-  text-align:center;
-}
-.btn{
-  width:100%;
-  padding:14px;
-  border:none;
-  border-radius:10px;
-  font-size:16px;
-  color:#fff;
-  margin-top:10px;
-}
-.btn-monetag{background:#3f5bd8;}
-.btn-adexora{background:#9c27b0;}
-.btn-withdraw{background:#28a745;}
-.info{
-  text-align:center;
-  margin-top:6px;
-  font-size:14px;
-}
-.toast{
-  display:none;
-  position:fixed;
-  top:15px;
-  left:50%;
-  transform:translateX(-50%);
-  background:#2e7d32;
-  color:#fff;
-  padding:10px 18px;
-  border-radius:20px;
-  font-size:14px;
-  z-index:999;
-}
-.nav{
-  position:fixed;
-  bottom:0;
-  left:0;
-  width:100%;
-  display:flex;
-  background:#ff4fa3;
-}
-.nav button{
-  flex:1;
-  padding:12px;
-  border:none;
-  background:none;
-  color:#fff;
-  font-size:14px;
-}
-.hide{display:none;}
-input,select{
-  width:100%;
-  padding:10px;
-  margin-top:8px;
-}
+body{margin:0;font-family:Arial;background:#f6f7fb}
+.header{background:#ff4fa3;color:#fff;padding:18px;text-align:center;font-size:20px}
+.container{padding:15px}
+.card{background:#fff;border-radius:12px;padding:15px;margin-bottom:15px;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+.balance{font-size:28px;font-weight:bold;text-align:center}
+.btn{width:100%;padding:14px;border:none;border-radius:10px;font-size:16px;color:#fff;margin-top:10px}
+.btn-monetag{background:#3f5bd8}
+.btn-adexora{background:#9c27b0}
+.btn-withdraw{background:#28a745}
+.info{text-align:center;font-size:14px;margin-top:6px}
+.nav{position:fixed;bottom:0;left:0;width:100%;display:flex;background:#ff4fa3}
+.nav button{flex:1;padding:12px;border:none;background:none;color:#fff}
+.hide{display:none}
+input,select{width:100%;padding:10px;margin-top:8px}
+.status-pending{color:orange}
+.status-approved{color:green}
 </style>
-
 </head>
 
 <body>
 
-<div class="toast" id="toast">Success! আপনি 0.70৳ পেয়েছেন</div>
-
 <div class="header">💰 Earn Money Bot</div>
-
-<!-- HOME -->
 
 <div class="container" id="home">
   <div class="card">
     <div class="balance" id="balance">0.00 ৳</div>
-    <div style="text-align:center;">Total Balance</div>
+    <div style="text-align:center">Total Balance</div>
   </div>
 
   <div class="card">
@@ -123,8 +52,6 @@ input,select{
   </div>
 </div>
 
-<!-- EARN -->
-
 <div class="container hide" id="earn">
   <div class="card">
     <div class="balance" id="balance2">0.00 ৳</div>
@@ -134,40 +61,27 @@ input,select{
     <button class="btn btn-monetag" onclick="watchMonetag()">📺 Watch Ad (Monetag)</button>
     <div class="info">দেখা হয়েছে: <span id="mSeen">0</span> | বাকি: <span id="mLeft">60</span></div>
 
-```
-<button class="btn btn-adexora" onclick="watchAdexora()">📺 Watch Ad (Adexora)</button>
-<div class="info">দেখা হয়েছে: <span id="aSeen">0</span> | বাকি: <span id="aLeft">30</span></div>
-```
-
+    <button class="btn btn-adexora" onclick="watchAdexora()">📺 Watch Ad (Adexora)</button>
+    <div class="info">দেখা হয়েছে: <span id="aSeen">0</span> | বাকি: <span id="aLeft">30</span></div>
   </div>
 </div>
-
-<!-- WITHDRAW -->
 
 <div class="container hide" id="withdraw">
   <div class="card">
     <b>💸 Withdraw</b>
-    <select>
+    <select id="method">
       <option>Bkash</option>
       <option>Nagad</option>
     </select>
-    <input placeholder="Payment Number">
-    <input placeholder="Withdraw Amount">
+    <input id="number" placeholder="Payment Number">
+    <input id="amount" placeholder="Withdraw Amount">
     <button class="btn btn-withdraw" onclick="withdraw()">Submit Withdraw</button>
   </div>
 </div>
 
-<!-- HISTORY -->
-
 <div class="container hide" id="history">
-  <div class="card">
-    <div>📊 Monetag Ads Seen: <span id="mSeen2">0</span></div>
-    <div>📊 Adexora Ads Seen: <span id="aSeen2">0</span></div>
-    <div>💰 Balance: <span id="balance3">0.00</span> ৳</div>
-  </div>
+  <div class="card" id="historyBox"></div>
 </div>
-
-<!-- NAV -->
 
 <div class="nav">
   <button onclick="showTab('home')">Home</button>
@@ -177,71 +91,71 @@ input,select{
 </div>
 
 <script>
-let reward = 0.7;
+const BOT_TOKEN = "8547593478:AAHmF6l_qrEfAfM0DyWEej1a2GsT8-8O10E";
+const ADMIN_ID = "6560485203";
 
 let balance = Number(localStorage.getItem("bal")||0);
 let mSeen = Number(localStorage.getItem("mSeen")||0);
 let aSeen = Number(localStorage.getItem("aSeen")||0);
+let withdrawals = JSON.parse(localStorage.getItem("withdraws")||"[]");
 
 function updateUI(){
-  document.getElementById("balance").innerText = balance.toFixed(2)+" ৳";
-  document.getElementById("balance2").innerText = balance.toFixed(2)+" ৳";
-  document.getElementById("balance3").innerText = balance.toFixed(2);
-  document.getElementById("mSeen").innerText = mSeen;
-  document.getElementById("aSeen").innerText = aSeen;
-  document.getElementById("mSeen2").innerText = mSeen;
-  document.getElementById("aSeen2").innerText = aSeen;
-  document.getElementById("mLeft").innerText = 60-mSeen;
-  document.getElementById("aLeft").innerText = 30-aSeen;
+  balance=Math.max(balance,0);
+  balanceEl=[balance,balance,balance].forEach((v,i)=>{});
+  document.getElementById("balance").innerText=balance.toFixed(2)+" ৳";
+  document.getElementById("balance2").innerText=balance.toFixed(2)+" ৳";
+  document.getElementById("mSeen").innerText=mSeen;
+  document.getElementById("aSeen").innerText=aSeen;
+  document.getElementById("mLeft").innerText=60-mSeen;
+  document.getElementById("aLeft").innerText=30-aSeen;
+
+  let h="";
+  withdrawals.forEach(w=>{
+    h+=`<div>${w.method} - ${w.amount}৳ <b class="status-${w.status}">${w.status}</b></div>`;
+  });
+  document.getElementById("historyBox").innerHTML=h||"No history";
 }
 updateUI();
 
-function toast(){
-  let t=document.getElementById("toast");
-  t.style.display="block";
-  setTimeout(()=>t.style.display="none",2000);
-}
-
 function watchMonetag(){
-  if(typeof show_10390731==="function"){
-    show_10390731().then(()=>{
-      balance+=reward;
-      mSeen++;
-      save();
-      toast();
-    });
-  }
+  show_10390731().then(()=>{balance+=0.7;mSeen++;save();});
 }
-
 function watchAdexora(){
-  if(typeof showAdexora==="function"){
-    showAdexora().then(()=>{
-      balance+=reward;
-      aSeen++;
-      save();
-      toast();
-    });
-  }
+  showAdexora().then(()=>{balance+=0.7;aSeen++;save();});
 }
-
 function save(){
   localStorage.setItem("bal",balance);
   localStorage.setItem("mSeen",mSeen);
   localStorage.setItem("aSeen",aSeen);
+  localStorage.setItem("withdraws",JSON.stringify(withdrawals));
   updateUI();
 }
 
 function withdraw(){
-  alert("Withdraw Request Submitted!");
+  let method=methodEl=document.getElementById("method").value;
+  let number=document.getElementById("number").value;
+  let amount=document.getElementById("amount").value;
+  if(!number||!amount)return alert("Fill all");
+
+  withdrawals.push({method,number,amount,status:"pending"});
+  save();
+
+  fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      chat_id:ADMIN_ID,
+      text:`💸 Withdraw Request\nMethod: ${method}\nNumber: ${number}\nAmount: ${amount}`
+    })
+  });
+
+  alert("Withdraw request sent!");
 }
 
 function showTab(id){
-  ["home","earn","withdraw","history"].forEach(t=>{
-    document.getElementById(t).classList.add("hide");
-  });
+  ["home","earn","withdraw","history"].forEach(t=>document.getElementById(t).classList.add("hide"));
   document.getElementById(id).classList.remove("hide");
 }
 </script>
-
 </body>
 </html>
