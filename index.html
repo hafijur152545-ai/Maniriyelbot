@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Maniriyel Bot</title>
+<title>Maniriyel Earn Bot</title>
 
 <!-- Monetag -->
 <script src='//libtl.com/sdk.js' data-zone='10390731' data-sdk='show_10390731'></script>
@@ -17,18 +17,30 @@
 body{margin:0;font-family:Segoe UI,sans-serif;background:#f2f4ff;padding-bottom:120px}
 .header{background:linear-gradient(135deg,#6d5dfc,#8f9bff);color:#fff;padding:20px;border-radius:0 0 25px 25px}
 .card{background:#fff;margin:15px;padding:20px;border-radius:20px;box-shadow:0 10px 25px rgba(0,0,0,.1)}
-.balance{font-size:34px;font-weight:700}
-.btn{width:100%;padding:14px;margin-top:10px;border:none;border-radius:14px;color:#fff;font-size:16px}
-.btn-blue{background:#2d6cdf}
-.btn-purple{background:#8a3ffc}
-.btn-dark{background:#2f3437}
-input,select{width:100%;padding:12px;margin-top:10px;border-radius:12px;border:1px solid #ccc}
+.balance{font-size:36px;font-weight:700}
+.small{color:#666;margin-top:5px}
+.btn{width:100%;padding:15px;margin-top:12px;border:none;border-radius:16px;font-size:17px;color:#fff}
+.btn-monetag{background:#3f51b5}
+.btn-adexora{background:#9c27b0}
+.btn-green{background:#2e7d32}
+input,select{width:100%;padding:12px;margin-top:10px;border-radius:10px;border:1px solid #ccc}
 .screen{display:none}
 .screen.active{display:block}
-.counter{margin-top:8px;font-size:14px;color:#555}
 .nav{position:fixed;bottom:10px;left:10px;right:10px;background:#2f3437;border-radius:20px;padding:12px;display:flex;justify-content:space-around;color:#bbb}
 .nav span{font-size:22px}
 .nav .active{color:#fff}
+
+/* Overlay */
+.overlay{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  background:rgba(0,0,0,.85);
+  display:none;align-items:center;justify-content:center;
+  color:#fff;z-index:9999;text-align:center
+}
+.overlay-box{
+  background:#1e1e1e;padding:30px;border-radius:20px;width:80%
+}
+.timer{font-size:40px;margin:20px 0}
 </style>
 </head>
 
@@ -43,43 +55,42 @@ input,select{width:100%;padding:12px;margin-top:10px;border-radius:12px;border:1
 <div id="home" class="screen active">
   <div class="card">
     <div class="balance" id="balance">0.00 ৳</div>
-    <small>Total Balance</small>
+    <div class="small" id="adCount">আজ দেখেছেন: 0 / 60</div>
   </div>
   <div class="card">
-    <button class="btn btn-dark" onclick="copyReferral()">👥 Referral Link</button>
+    <button class="btn btn-green" onclick="copyReferral()">👥 Referral Link</button>
   </div>
 </div>
 
 <!-- EARN -->
 <div id="earn" class="screen">
   <div class="card">
-    <div class="balance" id="balanceEarn">0.00 ৳</div>
-    <small>Total Balance</small>
-
-    <button class="btn btn-blue" onclick="watchMonetag()">📺 Watch Monetag (+0.70৳)</button>
-    <div class="counter">দেখা হয়েছে: <span id="mSeen">0</span> / 50</div>
-
-    <button class="btn btn-purple" onclick="watchAdexora()">📺 Watch Adexora (+0.70৳)</button>
-    <div class="counter">দেখা হয়েছে: <span id="aSeen">0</span> / 50</div>
+    <button class="btn btn-monetag" onclick="startAd('monetag')">📺 Watch Ad (Monetag +0.07৳)</button>
+    <button class="btn btn-adexora" onclick="startAd('adexora')">📺 Watch Ad (Adexora +0.07৳)</button>
   </div>
 </div>
 
-<!-- WITHDRAW (FIXED) -->
+<!-- WITHDRAW -->
 <div id="withdraw" class="screen">
   <div class="card">
     <h3>💸 Withdraw</h3>
-
     <select id="method">
       <option value="">Select Method</option>
       <option>Bkash</option>
       <option>Nagad</option>
       <option>Rocket</option>
     </select>
-
     <input id="number" placeholder="Payment Number">
     <input id="amount" type="number" placeholder="Amount">
+    <button class="btn btn-green" onclick="submitWithdraw()">Submit Withdraw</button>
+  </div>
+</div>
 
-    <button class="btn btn-dark" onclick="submitWithdraw()">Submit Withdraw</button>
+<!-- HISTORY -->
+<div id="history" class="screen">
+  <div class="card">
+    <h3>🧾 History</h3>
+    <div id="historyList">No history</div>
   </div>
 </div>
 
@@ -88,31 +99,45 @@ input,select{width:100%;padding:12px;margin-top:10px;border-radius:12px;border:1
   <span onclick="showScreen('home',this)" class="active">🏠</span>
   <span onclick="showScreen('earn',this)">🎬</span>
   <span onclick="showScreen('withdraw',this)">💸</span>
+  <span onclick="showScreen('history',this)">🧾</span>
+</div>
+
+<!-- OVERLAY -->
+<div class="overlay" id="overlay">
+  <div class="overlay-box">
+    <h3>⏳ Ad running</h3>
+    <div class="timer" id="timer">15</div>
+    <button class="btn btn-green" id="closeBtn" style="display:none" onclick="finishAd()">Close & Get Reward</button>
+  </div>
 </div>
 
 <script>
-const tg = window.Telegram.WebApp;
+/* CONFIG */
+const BOT_TOKEN="8547593478:AAHfAaZNdh6-gii36zff0DqIAxuuuHQUwd0";
+const ADMIN_ID="6560485203";
+const AD_REWARD=0.07;
+const DAILY_LIMIT=60;
+const MIN_WITHDRAW=20;
+
+const tg=window.Telegram.WebApp;
 tg.expand();
 
-let user = tg.initDataUnsafe.user || {id:0,first_name:"User"};
+let user=tg.initDataUnsafe.user;
+let balance=Number(localStorage.getItem("balance")||0);
+let ads=Number(localStorage.getItem("ads")||0);
+let history=JSON.parse(localStorage.getItem("history")||"[]");
 
-const AD_REWARD = 0.7;
-const DAILY_LIMIT = 50;
+userInfo.innerText=user.first_name+" | ID:"+user.id;
 
-let balance = Number(localStorage.getItem("balance")||0);
-let monetagSeen = Number(localStorage.getItem("monetagSeen")||0);
-let adexoraSeen = Number(localStorage.getItem("adexoraSeen")||0);
-
-document.getElementById("userInfo").innerText = user.first_name+" | ID:"+user.id;
-
-function refreshUI(){
-  balanceEl.innerText = balance.toFixed(2)+" ৳";
-  balanceEarn.innerText = balance.toFixed(2)+" ৳";
-  mSeen.innerText = monetagSeen;
-  aSeen.innerText = adexoraSeen;
+function updateUI(){
+  balanceEl.innerText=balance.toFixed(2)+" ৳";
+  adCount.innerText=`আজ দেখেছেন: ${ads} / ${DAILY_LIMIT}`;
 }
-refreshUI();
+const balanceEl=document.getElementById("balance");
 
+updateUI();
+
+/* NAV */
 function showScreen(id,el){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
@@ -120,40 +145,64 @@ function showScreen(id,el){
   el.classList.add("active");
 }
 
-function watchMonetag(){
-  if(monetagSeen>=DAILY_LIMIT) return alert("আজকের limit শেষ");
-  if(typeof show_10390731!=="function") return alert("Ad not ready");
-  show_10390731().then(()=>{
-    balance+=AD_REWARD;
-    monetagSeen++;
-    localStorage.setItem("balance",balance);
-    localStorage.setItem("monetagSeen",monetagSeen);
-    refreshUI();
-  }).catch(()=>alert("Ad failed"));
+/* AD SYSTEM */
+let adTimer;
+function startAd(type){
+  if(ads>=DAILY_LIMIT){alert("আজকের লিমিট শেষ");return;}
+  document.getElementById("overlay").style.display="flex";
+  let t=15;
+  timer.innerText=t;
+  closeBtn.style.display="none";
+
+  if(type==="monetag" && typeof show_10390731==="function"){ show_10390731(); }
+  if(type==="adexora" && typeof showAdexora==="function"){ showAdexora(); }
+
+  adTimer=setInterval(()=>{
+    t--;
+    timer.innerText=t;
+    if(t<=0){
+      clearInterval(adTimer);
+      closeBtn.style.display="block";
+    }
+  },1000);
 }
 
-function watchAdexora(){
-  if(adexoraSeen>=DAILY_LIMIT) return alert("আজকের limit শেষ");
-  if(typeof window.showAdexora!=="function") return alert("Ad not ready");
-  window.showAdexora().then(()=>{
-    balance+=AD_REWARD;
-    adexoraSeen++;
-    localStorage.setItem("balance",balance);
-    localStorage.setItem("adexoraSeen",adexoraSeen);
-    refreshUI();
-  }).catch(()=>alert("Ad failed"));
+function finishAd(){
+  overlay.style.display="none";
+  balance+=AD_REWARD;
+  ads++;
+  localStorage.setItem("balance",balance);
+  localStorage.setItem("ads",ads);
+  updateUI();
+  alert("✅ Reward Added +0.07৳");
 }
 
+/* WITHDRAW */
 function submitWithdraw(){
   let m=method.value,n=number.value,a=Number(amount.value);
-  if(!m||!n||!a) return alert("সব ঘর পূরণ করুন");
-  if(a>balance) return alert("Low balance");
+  if(!m||!n||!a)return alert("Fill all");
+  if(a<MIN_WITHDRAW)return alert("Minimum 20৳");
+  if(a>balance)return alert("Low balance");
+
+  fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${ADMIN_ID}&text=`+
+  encodeURIComponent(`Withdraw\nUser:${user.id}\n${m}\n${n}\nAmount:${a}৳`));
+
   balance-=a;
   localStorage.setItem("balance",balance);
-  refreshUI();
-  alert("Withdraw request sent");
+  history.push(`${m} | ${a}৳`);
+  localStorage.setItem("history",JSON.stringify(history));
+  renderHistory();
+  updateUI();
+  alert("Withdraw Sent");
 }
 
+/* HISTORY */
+function renderHistory(){
+  historyList.innerHTML=history.length?history.map(h=>`<p>${h}</p>`).join(""):"No history";
+}
+renderHistory();
+
+/* REF */
 function copyReferral(){
   let link=`https://t.me/maniriyel_bot?start=${user.id}`;
   navigator.clipboard.writeText(link);
