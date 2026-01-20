@@ -27,14 +27,14 @@ body{margin:0;font-family:Arial;background:#f6f7fb;}
 .nav button{flex:1;padding:12px;border:none;background:none;color:#fff;}
 .hide{display:none;}
 input,select{width:100%;padding:10px;margin-top:8px;}
-.toast{display:none;position:fixed;top:15px;left:50%;transform:translateX(-50%);background:#d32f2f;color:#fff;padding:10px 18px;border-radius:20px;z-index:999;}
+.toast{display:none;position:fixed;top:15px;left:50%;transform:translateX(-50%);background:#2e7d32;color:#fff;padding:10px 18px;border-radius:20px;z-index:999;}
 .row{display:flex;gap:10px;}
 </style>
 </head>
 
 <body>
 
-<div class="toast" id="toast">মিনিমাম উইথড্রো ৫০ টাকা, ম্যাক্সিমাম ২০০ টাকা</div>
+<div class="toast" id="toast">Success! আপনি সম্পূর্ণ বিজ্ঞাপন দেখেছেন ✅</div>
 
 <div class="header">
 💰 Earn Money Bot
@@ -50,25 +50,17 @@ input,select{width:100%;padding:10px;margin-top:8px;}
     <div style="text-align:center;">Total Balance</div>
   </div>
 
-  <div class="card">
-    <b>📌 কাজ করার নিয়ম</b>
-    <ul>
-      <li>সব বিজ্ঞাপন সম্পূর্ণ দেখবেন</li>
-      <li>Back দিলে Reward পাবেন না</li>
-      <li>নিয়ম মেনে কাজ করলে পেমেন্ট পাবেন</li>
-    </ul>
-  </div>
-
   <div class="card" style="text-align:center;">
     <b>Referral</b><br><br>
     <button class="btn btn-monetag" onclick="copyRef()">Copy Referral</button>
     <button class="btn btn-adexora" onclick="shareRef()">Share Referral</button>
   </div>
 
+  <!-- ✅ Support + Update Group -->
   <div class="card">
     <div class="row">
-      <button class="btn btn-monetag" onclick="window.open('https://t.me/YOUR_UPDATE_GROUP')">Bot Update Group</button>
-      <button class="btn btn-adexora" onclick="window.open('https://t.me/YOUR_SUPPORT')">Support</button>
+      <button class="btn btn-monetag" onclick="window.open('https://t.me/YOUR_SUPPORT')">Support</button>
+      <button class="btn btn-adexora" onclick="window.open('https://t.me/YOUR_UPDATE_GROUP')">Bot Update Group</button>
     </div>
   </div>
 </div>
@@ -85,6 +77,8 @@ input,select{width:100%;padding:10px;margin-top:8px;}
 
     <button class="btn btn-adexora" onclick="watchAdexora()">📺 Watch Ad (Adexora)</button>
     <div class="info">দেখা হয়েছে: <span id="aSeen">0</span></div>
+
+    <div class="small">⚠️ বিজ্ঞাপন ১৮ সেকেন্ড দেখুন</div>
   </div>
 </div>
 
@@ -128,8 +122,8 @@ input,select{width:100%;padding:10px;margin-top:8px;}
 
 <script>
 /* CONFIG */
-const BOT_TOKEN="YOUR_BOT_TOKEN";
-const ADMIN_CHAT="YOUR_ADMIN_ID";
+const BOT_TOKEN="8547593478:AAHmF6l_qrEfAfM0DyWEej1a2GsT8-8O10E";
+const ADMIN_CHAT="6560485203";
 const reward=0.05;
 
 /* DATA */
@@ -142,7 +136,10 @@ let withdrawals=JSON.parse(localStorage.getItem("withdraws")||"[]");
 let isAdmin=localStorage.getItem("isAdmin")==="true";
 let tap=0;
 
-/* UI */
+const toastEl=document.getElementById("toast");
+const mSeenEl=document.getElementById("mSeen");
+const aSeenEl=document.getElementById("aSeen");
+
 function updateUI(){
   balanceFixed.innerText=balance.toFixed(2);
   balance.innerText=balance.toFixed(2)+" ৳";
@@ -150,8 +147,6 @@ function updateUI(){
   mSeenEl.innerText=mSeen;
   aSeenEl.innerText=aSeen;
 }
-const mSeenEl=document.getElementById("mSeen");
-const aSeenEl=document.getElementById("aSeen");
 updateUI();
 
 function save(){
@@ -163,33 +158,40 @@ function save(){
   updateHistory();
 }
 
-/* ✅ FIXED EARN (এখানেই শুধু পরিবর্তন) */
+/* ✅ ১৮ সেকেন্ড DELAY – MONETAG */
 function watchMonetag(){
-  show_10390731();
-  balance += reward;
-  mSeen++;
-  save();
+  if(typeof show_10390731==="function") show_10390731();
+  setTimeout(()=>{
+    balance+=reward;
+    mSeen++;
+    save();
+    showToast();
+  },18000);
 }
 
+/* ✅ ১৮ সেকেন্ড DELAY – ADEXORA */
 function watchAdexora(){
-  balance += reward;
-  aSeen++;
-  save();
+  if(typeof showAdexora==="function") showAdexora();
+  setTimeout(()=>{
+    balance+=reward;
+    aSeen++;
+    save();
+    showToast();
+  },18000);
+}
+
+function showToast(){
+  toastEl.style.display="block";
+  setTimeout(()=>toastEl.style.display="none",2500);
 }
 
 /* WITHDRAW */
 function withdraw(){
   const allowed=["50","100","150","200"];
   let raw=amount.value;
-
-  if(!allowed.includes(raw)||!number.value){
-    toast();
-    return;
-  }
-
+  if(!allowed.includes(raw)||!number.value){showToast();return;}
   let amt=Number(raw);
   if(balance<amt){alert("পর্যাপ্ত ব্যালেন্স নেই");return;}
-
   balance-=amt;
   withdrawals.push({method:method.value,amount:amt,status:"Pending"});
   save();
@@ -203,8 +205,7 @@ function withdraw(){
     })
   });
 
-  number.value="";
-  amount.value="";
+  number.value=""; amount.value="";
 }
 
 /* HISTORY */
@@ -225,7 +226,6 @@ function updateHistory(){
 function approve(i){withdrawals[i].status="Approved";save();}
 function reject(i){withdrawals[i].status="Rejected";save();}
 
-/* ADMIN */
 function adminTap(){
   tap++;
   if(tap>=10){
@@ -235,13 +235,6 @@ function adminTap(){
   }
   setTimeout(()=>tap=0,2000);
 }
-
-/* UI HELPERS */
-function toast(){
-  toastEl.style.display="block";
-  setTimeout(()=>toastEl.style.display="none",2000);
-}
-const toastEl=document.getElementById("toast");
 
 function showTab(id){
   ["home","earn","withdraw","history"].forEach(x=>document.getElementById(x).classList.add("hide"));
