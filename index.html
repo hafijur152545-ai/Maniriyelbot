@@ -5,6 +5,7 @@
 <title>Earn Money Bot</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<!-- Ad Networks -->
 <script src="//libtl.com/sdk.js" data-zone="10390731" data-sdk="show_10390731"></script>
 <script src="https://adexora.com/cdn/ads.js?id=1551"></script>
 
@@ -21,19 +22,19 @@ body{margin:0;font-family:Arial;background:#f6f7fb;}
 .btn-adexora{background:#9c27b0;}
 .btn-withdraw{background:#28a745;}
 .info{text-align:center;font-size:14px;margin-top:6px;}
+.small{font-size:12px;color:#555;text-align:center;}
 .nav{position:fixed;bottom:0;left:0;width:100%;display:flex;background:#ff4fa3;}
 .nav button{flex:1;padding:12px;border:none;background:none;color:#fff;}
 .hide{display:none;}
 input,select{width:100%;padding:10px;margin-top:8px;}
 .toast{display:none;position:fixed;top:15px;left:50%;transform:translateX(-50%);background:#d32f2f;color:#fff;padding:10px 18px;border-radius:20px;z-index:999;}
 .row{display:flex;gap:10px;}
-.small{font-size:12px;text-align:center;color:#555;}
 </style>
 </head>
 
 <body>
 
-<div class="toast" id="toast">মিনিমাম ৫০৳, ম্যাক্সিমাম ২০০৳</div>
+<div class="toast" id="toast">মিনিমাম উইথড্রো ৫০ টাকা, ম্যাক্সিমাম ২০০ টাকা</div>
 
 <div class="header">
 💰 Earn Money Bot
@@ -59,11 +60,20 @@ input,select{width:100%;padding:10px;margin-top:8px;}
     </ul>
   </div>
 
+  <!-- REFERRAL -->
   <div class="card" style="text-align:center;">
     <b>@maniriyel_bot</b><br><br>
-    <button class="btn btn-monetag" onclick="copyRef()">Copy Link</button>
-    <button class="btn btn-adexora" onclick="shareRef()">Share</button>
-    <button class="btn btn-withdraw">Bondu ke refar koro ১০% besi kamao</button>
+    <button class="btn btn-monetag" onclick="copyRef()">Copy Referral Link</button>
+    <button class="btn btn-adexora" onclick="shareRef()">Share Referral</button>
+    <div class="small">বন্ধু ইনভাইট করে ১০% বোনাস পান</div>
+  </div>
+
+  <!-- SUPPORT / UPDATE -->
+  <div class="card">
+    <div class="row">
+      <button class="btn btn-monetag" onclick="window.location.href='https://t.me/+5kDmylLjgnswMjA1'">Bot Update Group</button>
+      <button class="btn btn-adexora" onclick="window.location.href='https://t.me/hafijur152'">Support</button>
+    </div>
   </div>
 </div>
 
@@ -79,13 +89,6 @@ input,select{width:100%;padding:10px;margin-top:8px;}
 
     <button class="btn btn-adexora" onclick="watchAdexora()">📺 Watch Ad (Adexora)</button>
     <div class="info">দেখা হয়েছে: <span id="aSeen">0</span> | বাকি: <span id="aLeft">30</span></div>
-
-    <div class="row">
-      <button class="btn btn-monetag" onclick="window.location='https://t.me/+5kDmylLjgnswMjA1'">Bot Update</button>
-      <button class="btn btn-adexora" onclick="window.location='https://t.me/hafijur152'">Support</button>
-    </div>
-    <div class="small">Bot Update Group & Support Channel</div>
-    <div class="small">সবার জন্য নির্দেশনা: সবাই ১০ টা এড দেখে ১ টা এডের উপর ক্লিক দিবেন</div>
   </div>
 </div>
 
@@ -102,11 +105,10 @@ input,select{width:100%;padding:10px;margin-top:8px;}
   </div>
 
   <div class="card small">
-    <b>পেমেন্ট তথ্য:</b><br>
-    পেমেন্ট মেথড: বিকাশ ও নগদ<br>
-    ২৪ ঘন্টার মধ্যে পেমেন্ট ক্লিয়ার<br>
-    ন্যূনতম উইথড্রো: ৫০ টাকা<br>
-    সর্বোচ্চ উইথড্রো: ২০০ টাকা
+    <b>⚠️ Notice:</b><br>
+    ন্যূনতম উইথড্রো ৫০ টাকা<br>
+    সর্বোচ্চ উইথড্রো ২০০ টাকা<br>
+    ২৪ ঘন্টার মধ্যে পেমেন্ট সম্পন্ন করা হবে
   </div>
 </div>
 
@@ -123,13 +125,13 @@ input,select{width:100%;padding:10px;margin-top:8px;}
 </div>
 
 <script>
+/* === BOT CONFIG === */
 const BOT_TOKEN="8547593478:AAHmF6l_qrEfAfM0DyWEej1a2GsT8-8O10E";
 const ADMIN_CHAT="6560485203";
 const reward=0.05;
 
-let balance=parseFloat(localStorage.getItem("bal"));
-if(isNaN(balance)) balance=0;
-
+/* === DATA === */
+let balance=parseFloat(localStorage.getItem("bal"))||0;
 let mSeen=Number(localStorage.getItem("mSeen"))||0;
 let aSeen=Number(localStorage.getItem("aSeen"))||0;
 let withdrawals=JSON.parse(localStorage.getItem("withdraws")||"[]");
@@ -137,21 +139,15 @@ let isAdmin=localStorage.getItem("isAdmin")==="true";
 let tap=0;
 
 function updateUI(){
-  document.getElementById("balance").innerText=balance.toFixed(2)+" ৳";
-  document.getElementById("balance2").innerText=balance.toFixed(2)+" ৳";
-  document.getElementById("balanceFixed").innerText=balance.toFixed(2);
-  document.getElementById("mSeen").innerText=mSeen;
-  document.getElementById("aSeen").innerText=aSeen;
-  document.getElementById("mLeft").innerText=60-mSeen;
-  document.getElementById("aLeft").innerText=30-aSeen;
+  balanceFixed.innerText=balance.toFixed(2);
+  balance.innerText=balance.toFixed(2)+" ৳";
+  balance2.innerText=balance.toFixed(2)+" ৳";
+  mSeen.innerText=mSeen;
+  aSeen.innerText=aSeen;
+  mLeft.innerText=60-mSeen;
+  aLeft.innerText=30-aSeen;
 }
 updateUI();
-
-const toastEl=document.getElementById("toast");
-function showWithdrawToast(){
-  toastEl.style.display="block";
-  setTimeout(()=>toastEl.style.display="none",2000);
-}
 
 function save(){
   localStorage.setItem("bal",balance);
@@ -166,19 +162,10 @@ function watchAdexora(){showAdexora().then(()=>{balance+=reward;aSeen++;save();}
 
 function withdraw(){
   let amt=Number(amount.value);
-  if(!number.value||!amt){showWithdrawToast();return;}
-  if(amt<50||amt>200||amt%50!==0){showWithdrawToast();return;}
+  if(!number.value||amt<50||amt>200){toast();return;}
   if(balance<amt){alert("পর্যাপ্ত ব্যালেন্স নেই");return;}
-
   balance-=amt;
-
-  withdrawals.push({
-    method:method.value,
-    amount:amt,
-    status:"Pending",
-    time:new Date().toLocaleString()
-  });
-
+  withdrawals.push({method:method.value,amount:amt,status:"Pending"});
   save();
 
   fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,{
@@ -190,16 +177,17 @@ function withdraw(){
     })
   });
 
-  amount.value="";number.value="";
-  alert("Withdraw submitted");
+  number.value="";amount.value="";
 }
 
 function updateHistory(){
   let h="";
   withdrawals.forEach((w,i)=>{
+    if(!isAdmin && w.status!=="Pending") return;
     h+=`${w.method} - ${w.amount}৳<br>Status: ${w.status}`;
-    if(isAdmin&&w.status==="Pending"){
-      h+=`<br><button onclick="approve(${i})">Approve</button>
+    if(isAdmin && w.status==="Pending"){
+      h+=`<br>
+      <button onclick="approve(${i})">Approve</button>
       <button onclick="reject(${i})">Reject</button>`;
     }
     h+="<hr>";
@@ -215,19 +203,25 @@ function adminTap(){
   if(tap>=10){
     isAdmin=true;
     localStorage.setItem("isAdmin","true");
-    alert("Admin mode ON");
-    updateHistory();
+    alert("Admin Mode ON");
   }
   setTimeout(()=>tap=0,2000);
 }
 
+function toast(){
+  toastEl.style.display="block";
+  setTimeout(()=>toastEl.style.display="none",2000);
+}
+const toastEl=document.getElementById("toast");
+
 function showTab(id){
-  ["home","earn","withdraw","history"].forEach(t=>document.getElementById(t).classList.add("hide"));
+  ["home","earn","withdraw","history"].forEach(x=>document.getElementById(x).classList.add("hide"));
   document.getElementById(id).classList.remove("hide");
 }
 
 function copyRef(){navigator.clipboard.writeText("https://t.me/maniriyel_bot");alert("Referral link copied");}
 function shareRef(){window.open("https://t.me/share/url?url=https://t.me/maniriyel_bot");}
 </script>
+
 </body>
 </html>
