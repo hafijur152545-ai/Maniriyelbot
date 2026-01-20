@@ -25,7 +25,7 @@ body{margin:0;font-family:Arial;background:#f6f7fb;}
 .nav button{flex:1;padding:12px;border:none;background:none;color:#fff;}
 .hide{display:none;}
 input,select{width:100%;padding:10px;margin-top:8px;}
-.toast{display:none;position:fixed;top:15px;left:50%;transform:translateX(-50%);background:#2e7d32;color:#fff;padding:10px 18px;border-radius:20px;z-index:999;}
+.toast{display:none;position:fixed;top:15px;left:50%;transform:translateX(-50%);background:#d32f2f;color:#fff;padding:10px 18px;border-radius:20px;z-index:999;}
 .row{display:flex;gap:10px;}
 .small{font-size:12px;text-align:center;color:#555;}
 </style>
@@ -33,7 +33,7 @@ input,select{width:100%;padding:10px;margin-top:8px;}
 
 <body>
 
-<div class="toast" id="toast">Success! আপনি ০.০৫ টাকা পেয়েছেন</div>
+<div class="toast" id="toast">মিনিমাম ৫০৳, ম্যাক্সিমাম ২০০৳</div>
 
 <div class="header">
 💰 Earn Money Bot
@@ -92,7 +92,10 @@ input,select{width:100%;padding:10px;margin-top:8px;}
 <!-- WITHDRAW -->
 <div class="container hide" id="withdraw">
   <div class="card">
-    <select id="method"><option>Bkash</option><option>Nagad</option></select>
+    <select id="method">
+      <option>Bkash</option>
+      <option>Nagad</option>
+    </select>
     <input id="number" placeholder="Payment Number">
     <input id="amount" placeholder="Withdraw Amount">
     <button class="btn btn-withdraw" onclick="withdraw()">Submit Withdraw</button>
@@ -124,53 +127,70 @@ const BOT_TOKEN="8547593478:AAHmF6l_qrEfAfM0DyWEej1a2GsT8-8O10E";
 const ADMIN_CHAT="6560485203";
 const reward=0.05;
 
-/* ✅ BALANCE FIX */
-let balance = parseFloat(localStorage.getItem("bal"));
-if (isNaN(balance)) balance = 0;
+let balance=parseFloat(localStorage.getItem("bal"));
+if(isNaN(balance)) balance=0;
 
-let mSeen = Number(localStorage.getItem("mSeen")) || 0;
-let aSeen = Number(localStorage.getItem("aSeen")) || 0;
-let withdrawals = JSON.parse(localStorage.getItem("withdraws") || "[]");
-let isAdmin = localStorage.getItem("isAdmin") === "true";
-let tap = 0;
+let mSeen=Number(localStorage.getItem("mSeen"))||0;
+let aSeen=Number(localStorage.getItem("aSeen"))||0;
+let withdrawals=JSON.parse(localStorage.getItem("withdraws")||"[]");
+let isAdmin=localStorage.getItem("isAdmin")==="true";
+let tap=0;
 
 function updateUI(){
-  document.getElementById("balance").innerText = balance.toFixed(2) + " ৳";
-  document.getElementById("balance2").innerText = balance.toFixed(2) + " ৳";
-  document.getElementById("balanceFixed").innerText = balance.toFixed(2);
-
-  document.getElementById("mSeen").innerText = mSeen;
-  document.getElementById("aSeen").innerText = aSeen;
-  document.getElementById("mLeft").innerText = 60 - mSeen;
-  document.getElementById("aLeft").innerText = 30 - aSeen;
+  document.getElementById("balance").innerText=balance.toFixed(2)+" ৳";
+  document.getElementById("balance2").innerText=balance.toFixed(2)+" ৳";
+  document.getElementById("balanceFixed").innerText=balance.toFixed(2);
+  document.getElementById("mSeen").innerText=mSeen;
+  document.getElementById("aSeen").innerText=aSeen;
+  document.getElementById("mLeft").innerText=60-mSeen;
+  document.getElementById("aLeft").innerText=30-aSeen;
 }
 updateUI();
 
 const toastEl=document.getElementById("toast");
-function toast(){
+function showWithdrawToast(){
   toastEl.style.display="block";
   setTimeout(()=>toastEl.style.display="none",2000);
 }
 
-function watchMonetag(){show_10390731().then(()=>{balance+=reward;mSeen++;save();toast();});}
-function watchAdexora(){showAdexora().then(()=>{balance+=reward;aSeen++;save();toast();});}
-
 function save(){
-  localStorage.setItem("bal", balance);
-  localStorage.setItem("mSeen", mSeen);
-  localStorage.setItem("aSeen", aSeen);
-  localStorage.setItem("withdraws", JSON.stringify(withdrawals));
+  localStorage.setItem("bal",balance);
+  localStorage.setItem("mSeen",mSeen);
+  localStorage.setItem("aSeen",aSeen);
+  localStorage.setItem("withdraws",JSON.stringify(withdrawals));
   updateUI();updateHistory();
 }
 
+function watchMonetag(){show_10390731().then(()=>{balance+=reward;mSeen++;save();});}
+function watchAdexora(){showAdexora().then(()=>{balance+=reward;aSeen++;save();});}
+
 function withdraw(){
-  if(Number(amount.value)<50){alert("ন্যূনতম উইথড্রো ৫০ টাকা");return;}
-  let w={method:method.value,amount:amount.value,status:"Pending",time:new Date().toLocaleString()};
-  withdrawals.push(w);save();
-  fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,{
-    method:"POST",headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({chat_id:ADMIN_CHAT,text:`Withdraw Request\n${w.method}\n${w.amount}৳\nStatus: Pending`})
+  let amt=Number(amount.value);
+  if(!number.value||!amt){showWithdrawToast();return;}
+  if(amt<50||amt>200||amt%50!==0){showWithdrawToast();return;}
+  if(balance<amt){alert("পর্যাপ্ত ব্যালেন্স নেই");return;}
+
+  balance-=amt;
+
+  withdrawals.push({
+    method:method.value,
+    amount:amt,
+    status:"Pending",
+    time:new Date().toLocaleString()
   });
+
+  save();
+
+  fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,{
+    method:"POST",
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      chat_id:ADMIN_CHAT,
+      text:`Withdraw Request\n${method.value}\n${amt}৳\nStatus: Pending`
+    })
+  });
+
+  amount.value="";number.value="";
   alert("Withdraw submitted");
 }
 
@@ -180,11 +200,11 @@ function updateHistory(){
     h+=`${w.method} - ${w.amount}৳<br>Status: ${w.status}`;
     if(isAdmin&&w.status==="Pending"){
       h+=`<br><button onclick="approve(${i})">Approve</button>
-          <button onclick="reject(${i})">Reject</button>`;
+      <button onclick="reject(${i})">Reject</button>`;
     }
     h+="<hr>";
   });
-  historyBox.innerHTML = h || "<div class='small'>কোনো হিস্টোরি নেই</div>";
+  historyBox.innerHTML=h||"<div class='small'>কোনো হিস্টোরি নেই</div>";
 }
 
 function approve(i){withdrawals[i].status="Approved";save();}
